@@ -1,10 +1,12 @@
 import { BasePage } from './BasePage';
 import { LoginForm } from '../components/LoginForm';
+import { Notification } from '../components/Notification';
 
 export class LoginPage extends BasePage {
   constructor(page) {
     super(page);
     this.component = new LoginForm(page);
+    this.notification = new Notification(page);
   }
 
   async open() {

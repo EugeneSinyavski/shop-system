@@ -5,8 +5,8 @@ export class BasePage {
     this.page = page;
   }
 
-  async open() {
-    await this.page.goto('/');
+  async open(path) {
+    await this.page.goto(path);
   }
 
   async expectVisible(locator) {
