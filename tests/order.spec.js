@@ -1,27 +1,41 @@
 // @ts-check
-import { test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { LoginPage } from '../PO/pages/LoginPage';
 import { HomePage } from '../PO/pages/HomePage';
+import { CartPage } from '../PO/pages/CartPage';
+import { OrderPage } from '../PO/pages/OrderPage';
 
 test('Happy Path: authorized user can place an order', async ({ page }) => {
   const loginPage = new LoginPage(page);
   const homePage = new HomePage(page);
-  await loginPage.open();
+  const cartPage = new CartPage(page);
+  const orderPage = new OrderPage(page);
 
-  await loginPage.expectLoginFormVisible();
+  await loginPage.open();
+  await expect(loginPage.loginForm.pageHeading).toBeVisible();
   await loginPage.fillCredentials(process.env.USER_EMAIL, process.env.USER_PASSWORD);
   await loginPage.submit();
 
   await homePage.notification.expectToastWithText('Вход выполнен успешно!');
-  await homePage.expectCatalogHeaderVisible();
+  await expect(homePage.productCatalog.catalogHeader).toBeVisible();
 
-  const name = await homePage.getProductName(0);
-  const price = await homePage.getProductPrice(0);
-  console.log(`Adding to cart product: ${name} with price: ${price}`);
-
+  const catalogProductName = await homePage.getProductName(0);
+  const catalogProductPrice = await homePage.getProductPrice(0);
   await homePage.addProductToCart(0);
-  await homePage.notification.expectToastWithText('Товар добавлен в корзину');
 
+  await homePage.notification.expectToastWithText('Товар добавлен в корзину');
   await homePage.header.openCart();
-  await page.pause(5000);
+
+  const cartItemsInfo = await cartPage.cartDetails.getCartInfo();
+  expect(cartItemsInfo.items[0].name).toBe(catalogProductName);
+  expect(cartItemsInfo.items[0].price).toBe(catalogProductPrice);
+
+  await cartPage.cartDetails.checkout();
+  await cartPage.notification.expectToastWithText('Заказ успешно создан!');
+
+  await homePage.header.openOrders();
+
+  const lastOrderData = await orderPage.orderDetails.getLastOrderData();
+  expect(lastOrderData.totalPrice).toBe(cartItemsInfo.total);
+  expect(lastOrderData.products).toContain(cartItemsInfo.items[0].name);
 });

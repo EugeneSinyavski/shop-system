@@ -5,6 +5,7 @@ export class Notification {
     this.page = page;
     this.toastLocator = page.getByRole('listitem');
   }
+
   async expectToastWithText(expectedText) {
     const toast = this.toastLocator.filter({ hasText: expectedText }).first();
     await expect(toast).toBeVisible();

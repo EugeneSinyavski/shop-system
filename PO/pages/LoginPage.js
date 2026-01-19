@@ -5,7 +5,7 @@ import { Notification } from '../components/Notification';
 export class LoginPage extends BasePage {
   constructor(page) {
     super(page);
-    this.component = new LoginForm(page);
+    this.loginForm = new LoginForm(page);
     this.notification = new Notification(page);
   }
 
@@ -14,15 +14,15 @@ export class LoginPage extends BasePage {
   }
 
   async expectLoginFormVisible() {
-    await this.expectVisible(this.component.form);
+    await this.expectVisible(this.loginForm.form);
   }
 
   async fillCredentials(email, password) {
-    await this.component.emailInput.fill(email);
-    await this.component.passwordInput.fill(password);
+    await this.loginForm.emailInput.fill(email);
+    await this.loginForm.passwordInput.fill(password);
   }
 
   async submit() {
-    await this.component.submitButton.click();
+    await this.loginForm.submitButton.click();
   }
 }
