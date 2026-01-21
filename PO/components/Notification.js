@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test';
+import { TOAST_MESSAGES } from '../../fixtures/messages.js';
 
 export class Notification {
   constructor(page) {
@@ -6,9 +7,20 @@ export class Notification {
     this.toastLocator = page.getByRole('listitem');
   }
 
-  async expectToastWithText(expectedText) {
+  async expectToastWithText(expectedText, timeout = 10000) {
     const toast = this.toastLocator.filter({ hasText: expectedText }).first();
     await expect(toast).toBeVisible();
-    await toast.waitFor({ state: 'hidden', timeout: 5000 });
+    await expect(toast).toBeHidden({ timeout: timeout });
+  }
+  async expectLoginSuccess() {
+    await this.expectToastWithText(TOAST_MESSAGES.LOGIN_SUCCESS);
+  }
+
+  async expectAddedToCart() {
+    await this.expectToastWithText(TOAST_MESSAGES.ADDED_TO_CART);
+  }
+
+  async expectOrderCreated() {
+    await this.expectToastWithText(TOAST_MESSAGES.ORDER_CREATED);
   }
 }

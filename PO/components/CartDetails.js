@@ -8,10 +8,6 @@ export class CartDetails {
     this.checkoutButton = page.getByRole('button', { name: 'Оформить заказ' });
   }
 
-  aaaaaaparsePrice(priceStr = '') {
-    return parseFloat(priceStr.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
-  }
-
   async count() {
     return await this.cartItems.count();
   }
