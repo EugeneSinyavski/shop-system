@@ -5,38 +5,92 @@ import { HomePage } from '../../PO/pages/HomePage';
 import { CartPage } from '../../PO/pages/CartPage';
 import { OrderPage } from '../../PO/pages/OrderPage';
 
-test('Happy Path: authorized user can place an order', async ({ page }) => {
-  const loginPage = new LoginPage(page);
-  const homePage = new HomePage(page);
-  const cartPage = new CartPage(page);
-  const orderPage = new OrderPage(page);
+import { AuthAPI } from '../../apiClients/AuthAPI';
+import { generateTestUser } from '../../utils/testData';
 
-  await homePage.open();
-  await loginPage.open();
-  await expect(loginPage.loginForm.pageHeading).toBeVisible();
-  await loginPage.fillCredentials(process.env.USER_EMAIL, process.env.USER_PASSWORD);
-  await loginPage.submit();
+test.describe('TC-UI-01: Authorized user can place an order', () => {
+  let page;
+  let loginPage;
+  let homePage;
+  let cartPage;
+  let orderPage;
 
-  await homePage.notification.expectLoginSuccess();
-  await expect(homePage.productCatalog.catalogHeader).toBeVisible();
+  let testUser;
 
-  const catalogProductName = await homePage.getProductName(0);
-  const catalogProductPrice = await homePage.getProductPrice(0);
-  await homePage.addProductToCart(0);
+  test.beforeEach(async ({ page: browserPage, request }) => {
+    page = browserPage;
+    loginPage = new LoginPage(page);
+    homePage = new HomePage(page);
+    cartPage = new CartPage(page);
+    orderPage = new OrderPage(page);
 
-  await homePage.notification.expectAddedToCart();
-  await homePage.header.openCart();
+    const authApi = new AuthAPI(request);
+    testUser = generateTestUser();
+    await authApi.registerUser(testUser);
 
-  const cartItemsInfo = await cartPage.cartDetails.getCartInfo();
-  expect(cartItemsInfo.items[0].name).toBe(catalogProductName);
-  expect(cartItemsInfo.items[0].price).toBe(catalogProductPrice);
+    test.info().annotations.push({
+      type: 'testUser',
+      description: testUser.email,
+    });
+  });
 
-  await cartPage.cartDetails.checkout();
-  await cartPage.notification.expectOrderCreated();
+  test.afterEach(async () => {
+    await test.step('Post-condition: simulate deletion of test user', async () => {
+      // API does not support DELETE; simulation only
+      if (testUser) {
+        // placeholder for future cleanup if API adds DELETE endpoint
+      }
+    });
+  });
 
-  await homePage.header.openOrders();
+  test('Happy Path: registered user can place an order', async () => {
+    let productName;
+    let productPrice;
 
-  const lastOrderData = await orderPage.orderDetails.getLastOrderData();
-  expect(lastOrderData.totalPrice).toBe(cartItemsInfo.total);
-  expect(lastOrderData.products).toContain(cartItemsInfo.items[0].name);
+    await test.step('1: Open login page', async () => {
+      await loginPage.open();
+      await expect(loginPage.loginForm.pageHeading).toBeVisible();
+      await expect(page).toHaveURL(/\/login$/);
+    });
+
+    await test.step('2: Login with valid credentials', async () => {
+      await loginPage.fillCredentials(testUser.email, testUser.password);
+      await loginPage.submit();
+
+      await expect(page).toHaveURL(/\/$/);
+      await homePage.notification.expectLoginSuccess();
+    });
+
+    await test.step('3: Add first available product to the cart', async () => {
+      productName = await homePage.getProductName();
+      productPrice = await homePage.getProductPrice();
+
+      await homePage.addProductToCart();
+      await homePage.notification.expectAddedToCart();
+    });
+
+    await test.step('4: Open the cart', async () => {
+      await homePage.header.openCart();
+      await expect(page).toHaveURL(/\/cart$/);
+      await cartPage.cartDetails.verifyItemInCart(productName, productPrice);
+    });
+
+    await test.step('5: Place the order', async () => {
+      await cartPage.cartDetails.checkout();
+      await cartPage.notification.expectOrderCreated();
+      await expect(page).toHaveURL(/\/$/);
+    });
+
+    await test.step('6: Open Order History', async () => {
+      await homePage.header.openOrders();
+      await expect(page).toHaveURL(/\/orders$/);
+    });
+
+    await test.step('7: Verify latest order details', async () => {
+      const lastOrderData = await orderPage.orderDetails.getLastOrderData();
+
+      expect(lastOrderData.totalPrice).toBe(productPrice);
+      expect(lastOrderData.products).toContain(productName);
+    });
+  });
 });

@@ -1,4 +1,5 @@
 import { parsePrice } from '../../utils/parse';
+import { expect } from '@playwright/test';
 
 export class CartDetails {
   constructor(page) {
@@ -36,5 +37,17 @@ export class CartDetails {
 
   async checkout() {
     await this.checkoutButton.click();
+  }
+
+  async verifyItemInCart(expectedName, expectedPrice) {
+    const info = await this.getCartInfo();
+    const foundItem = info.items.find((item) => item.name === expectedName);
+    if (!foundItem) {
+      throw new Error(
+        `FAILED: Товар "${expectedName}" не найден в корзине. Доступны: ${JSON.stringify(info.items)}`
+      );
+    }
+
+    expect(foundItem.price).toBe(expectedPrice);
   }
 }

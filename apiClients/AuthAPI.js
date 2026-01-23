@@ -19,6 +19,15 @@ export class AuthAPI {
     return await response.json();
   }
 
+  async registerUserExpectingError(userData, expectedStatus = 409) {
+    const response = await this.request.post(this.getUrl(endpoints.auth.register), {
+      data: userData,
+    });
+    expect(response.status()).toBe(expectedStatus);
+    const body = await response.json();
+    return body;
+  }
+
   async loginUser(email, password) {
     const response = await this.request.post(this.getUrl(endpoints.auth.login), {
       data: { email, password },

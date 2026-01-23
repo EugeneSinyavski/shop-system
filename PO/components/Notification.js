@@ -7,11 +7,16 @@ export class Notification {
     this.toastLocator = page.getByRole('listitem');
   }
 
-  async expectToastWithText(expectedText, timeout = 10000) {
+  async expectToastWithText(expectedText) {
+    const toast = this.toastLocator.filter({ hasText: expectedText }).last();
+    await expect(toast).toBeVisible();
+  }
+  async expectToastDisappearance(expectedText, timeout = 10000) {
     const toast = this.toastLocator.filter({ hasText: expectedText }).first();
     await expect(toast).toBeVisible();
     await expect(toast).toBeHidden({ timeout: timeout });
   }
+
   async expectLoginSuccess() {
     await this.expectToastWithText(TOAST_MESSAGES.LOGIN_SUCCESS);
   }
