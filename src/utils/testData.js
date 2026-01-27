@@ -1,4 +1,6 @@
-import { faker } from '@faker-js/faker';
+import { Faker, ru } from '@faker-js/faker';
+
+const faker = new Faker({ locale: [ru] });
 
 export function generateTestUser(overrides = {}) {
   const uniqueId = faker.string.uuid();
@@ -6,7 +8,7 @@ export function generateTestUser(overrides = {}) {
   return {
     firstname: faker.person.firstName(),
     lastname: faker.person.lastName(),
-    phoneNumber: '+1' + faker.string.numeric(10),
+    phoneNumber: '+7' + faker.string.numeric(10),
     email: `user-${uniqueId}@example.com`,
     username: `user-${uniqueId}`,
     password: 'Password123!',

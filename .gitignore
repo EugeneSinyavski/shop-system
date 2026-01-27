@@ -1,3 +1,8 @@
+# Allure results and report
+allure-results/
+allure-report/
+
+# Environment files
 .env
 
 # Playwright

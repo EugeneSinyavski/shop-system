@@ -1,8 +1,10 @@
-import { parsePrice } from '../../utils/parse';
+import { BasePage } from './BasePage';
+import { parsePrice } from '../utils/parsePrice';
 import { expect } from '@playwright/test';
 
-export class CartDetails {
+export class CartPage extends BasePage {
   constructor(page) {
+    super(page);
     this.page = page;
     this.cartItems = page.getByRole('button', { name: 'Удалить' }).locator('..');
     this.totalValue = page.locator('div').filter({ hasText: 'Итого:' }).locator('span').last();
@@ -42,12 +44,7 @@ export class CartDetails {
   async verifyItemInCart(expectedName, expectedPrice) {
     const info = await this.getCartInfo();
     const foundItem = info.items.find((item) => item.name === expectedName);
-    if (!foundItem) {
-      throw new Error(
-        `FAILED: Товар "${expectedName}" не найден в корзине. Доступны: ${JSON.stringify(info.items)}`
-      );
-    }
-
+    expect(foundItem).toBeDefined();
     expect(foundItem.price).toBe(expectedPrice);
   }
 }

@@ -1,9 +1,10 @@
-import { parsePrice } from '../../utils/parse';
+import { BasePage } from './BasePage';
+import { parsePrice } from '../utils/parsePrice';
 
-export class OrderDetails {
+export class OrderPage extends BasePage {
   constructor(page) {
+    super(page);
     this.page = page;
-
     this.orders = page.getByRole('button', { name: /Заказ #/ });
     this.lastOrder = this.orders.last();
 

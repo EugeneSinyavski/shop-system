@@ -1,7 +1,6 @@
-//@ts-check
 import { expect, test } from '@playwright/test';
-import { LoginPage } from '../../PO/pages/LoginPage';
-import { HomePage } from '../../PO/pages/HomePage';
+import { LoginPage } from '../../src/pages/LoginPage';
+import { HomePage } from '../../src/pages/HomePage';
 
 test.describe('TC-UI-SM-04: Admin user sees admin panel on Home page', () => {
   let page;
@@ -17,7 +16,7 @@ test.describe('TC-UI-SM-04: Admin user sees admin panel on Home page', () => {
   test('Smoke: admin sees admin panel after login', async () => {
     await test.step('1: Open login page', async () => {
       await loginPage.open();
-      await expect(loginPage.loginForm.pageHeading).toBeVisible();
+      await expect(loginPage.pageHeading).toBeVisible();
       await expect(page).toHaveURL(/\/login$/);
     });
 
@@ -31,7 +30,5 @@ test.describe('TC-UI-SM-04: Admin user sees admin panel on Home page', () => {
     await test.step('3: Verify admin panel is displayed in header', async () => {
       await expect(homePage.header.adminPanel).toBeVisible();
     });
-
-    await page.pause();
   });
 });

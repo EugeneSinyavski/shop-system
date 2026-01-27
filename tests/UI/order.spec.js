@@ -1,12 +1,11 @@
-//@ts-check
 import { expect, test } from '@playwright/test';
-import { LoginPage } from '../../PO/pages/LoginPage';
-import { HomePage } from '../../PO/pages/HomePage';
-import { CartPage } from '../../PO/pages/CartPage';
-import { OrderPage } from '../../PO/pages/OrderPage';
+import { LoginPage } from '../../src/pages/LoginPage';
+import { HomePage } from '../../src/pages/HomePage';
+import { CartPage } from '../../src/pages/CartPage';
+import { OrderPage } from '../../src/pages/OrderPage';
 
-import { AuthAPI } from '../../apiClients/AuthAPI';
-import { generateTestUser } from '../../utils/testData';
+import { AuthAPI } from '../../src/apiClients/AuthAPI';
+import { generateTestUser } from '../../src/utils/testData';
 
 test.describe('TC-UI-01: Authorized user can place an order', () => {
   let page;
@@ -49,7 +48,7 @@ test.describe('TC-UI-01: Authorized user can place an order', () => {
 
     await test.step('1: Open login page', async () => {
       await loginPage.open();
-      await expect(loginPage.loginForm.pageHeading).toBeVisible();
+      await expect(loginPage.pageHeading).toBeVisible();
       await expect(page).toHaveURL(/\/login$/);
     });
 
@@ -61,6 +60,7 @@ test.describe('TC-UI-01: Authorized user can place an order', () => {
       await homePage.notification.expectLoginSuccess();
     });
 
+    //vs
     await test.step('3: Add first available product to the cart', async () => {
       productName = await homePage.getProductName();
       productPrice = await homePage.getProductPrice();
@@ -72,11 +72,11 @@ test.describe('TC-UI-01: Authorized user can place an order', () => {
     await test.step('4: Open the cart', async () => {
       await homePage.header.openCart();
       await expect(page).toHaveURL(/\/cart$/);
-      await cartPage.cartDetails.verifyItemInCart(productName, productPrice);
+      await cartPage.verifyItemInCart(productName, productPrice);
     });
 
     await test.step('5: Place the order', async () => {
-      await cartPage.cartDetails.checkout();
+      await cartPage.checkout();
       await cartPage.notification.expectOrderCreated();
       await expect(page).toHaveURL(/\/$/);
     });
@@ -87,7 +87,7 @@ test.describe('TC-UI-01: Authorized user can place an order', () => {
     });
 
     await test.step('7: Verify latest order details', async () => {
-      const lastOrderData = await orderPage.orderDetails.getLastOrderData();
+      const lastOrderData = await orderPage.getLastOrderData();
 
       expect(lastOrderData.totalPrice).toBe(productPrice);
       expect(lastOrderData.products).toContain(productName);

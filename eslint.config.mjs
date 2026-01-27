@@ -32,6 +32,13 @@ export default [
   // 3. Global ignores (Standard for ESLint 9)
   {
     ignores: [
+      'node_modules/',
+      'allure-results/',
+      'allure-report/',
+
+      'test-results/',
+      '*.zip',
+      '.env',
       'node_modules/**',
       'test-results/**',
       'playwright-report/**',

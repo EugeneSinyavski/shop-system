@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { AuthAPI } from '../../apiClients/AuthAPI';
-import { generateTestUser } from '../../utils/testData';
-import { validateUserData } from '../../utils/userValidators';
+import { AuthAPI } from '../../src/apiClients/AuthAPI';
+import { generateTestUser } from '../../src/utils/testData';
+import { validateUserData } from '../../src/utils/userValidators';
 
 test.describe('Register and Login User', () => {
   let authApi;

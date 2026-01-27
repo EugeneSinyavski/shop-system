@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { TOAST_MESSAGES } from '../../fixtures/messages.js';
+import { TOAST_MESSAGES } from '../data/messages.js';
 
 export class Notification {
   constructor(page) {

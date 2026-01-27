@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { endpoints } from '../config/endpoints.js';
+import { endpoints } from '../../config/endpoints.js';
 
 const API_URL = process.env.API_URL || 'http://localhost:3000';
 
