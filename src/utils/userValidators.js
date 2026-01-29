@@ -1,18 +1,22 @@
-import { expect } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
-export function validateUserData(user, response) {
-  expect(response).toEqual(
-    expect.objectContaining({
-      id: expect.any(Number),
-      firstname: user.firstname,
-      lastname: user.lastname,
-      phoneNumber: user.phoneNumber,
-      email: user.email,
-      username: user.username,
-      role: 'USER',
-      bucket_id: expect.any(Number),
-    })
-  );
+export async function validateUserData(expectedUser, actualResponse) {
+  await test.step(`Validate response data for ${expectedUser.email}`, async () => {
+    expect.soft(actualResponse, 'User data structure mismatch').toEqual(
+      expect.objectContaining({
+        id: expect.any(Number),
+        firstname: expectedUser.firstname,
+        lastname: expectedUser.lastname,
+        phoneNumber: expectedUser.phoneNumber,
+        email: expectedUser.email,
+        username: expectedUser.username,
+        role: expectedUser.role || 'USER',
+        bucket_id: expect.any(Number),
+      })
+    );
 
-  expect(response).not.toHaveProperty('password');
+    expect
+      .soft(actualResponse, 'Security check: Password should not be present')
+      .not.toHaveProperty('password');
+  });
 }

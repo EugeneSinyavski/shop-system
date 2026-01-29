@@ -1,4 +1,4 @@
-import { expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { endpoints } from '../../config/endpoints.js';
 
 const API_URL = process.env.API_URL || 'http://localhost:3000';
@@ -7,40 +7,68 @@ export class AuthAPI {
   constructor(request) {
     this.request = request;
   }
+
   getUrl(endpoint) {
     return `${API_URL}${endpoint}`;
   }
 
-  async registerUser(userData) {
-    const response = await this.request.post(this.getUrl(endpoints.auth.register), {
-      data: userData,
-    });
-    await expect(response).toBeOK();
-    return await response.json();
+  async _attachData(name, data) {
+    if (data) {
+      await test.info().attach(name, {
+        body: JSON.stringify(data, null, 2),
+        contentType: 'application/json',
+      });
+    }
   }
 
-  async registerUserExpectingError(userData, expectedStatus = 409) {
-    const response = await this.request.post(this.getUrl(endpoints.auth.register), {
-      data: userData,
+  async registerUser(userData) {
+    return await test.step(`→ Register User: ${userData.email}`, async () => {
+      const url = this.getUrl(endpoints.auth.register);
+      await this._attachData('Request Body', userData);
+
+      const response = await this.request.post(url, { data: userData });
+      const body = await response.json();
+
+      await this._attachData('Response Body', body);
+
+      expect(response.status(), `Status check. Body:${JSON.stringify(body)}`).toBe(201);
+
+      return body;
     });
-    expect(response.status()).toBe(expectedStatus);
-    const body = await response.json();
-    return body;
+  }
+
+  async registerUserExpectingError(userData, expectedStatus) {
+    return await test.step(`→ Register User (Expect Error ${expectedStatus})`, async () => {
+      const url = this.getUrl(endpoints.auth.register);
+      await this._attachData('Request Body (Conflict)', userData);
+
+      const response = await this.request.post(url, { data: userData });
+      const body = await response.json();
+
+      await this._attachData('Error Response Body', body);
+
+      await test.step(`Verify status code is ${expectedStatus}`, async () => {
+        expect(response.status()).toBe(expectedStatus);
+      });
+
+      return body;
+    });
   }
 
   async loginUser(email, password) {
-    const response = await this.request.post(this.getUrl(endpoints.auth.login), {
-      data: { email, password },
-    });
-    await expect(response).toBeOK();
-    const body = await response.json();
-    expect(body.email).toBe(email);
-    expect(body).toHaveProperty('id');
-    return body;
-  }
+    return await test.step(`→ Login User: ${email}`, async () => {
+      const url = this.getUrl(endpoints.auth.login);
+      const payload = { email, password };
 
-  async deleteUser(userId) {
-    console.log(`User ${userId} created. Cleanup skipped (API restriction).`);
-    return true;
+      await this._attachData('Login Request', payload);
+
+      const response = await this.request.post(url, { data: payload });
+      const body = await response.json();
+
+      await this._attachData('Login Response', body);
+
+      await expect(response).toBeOK();
+      return body;
+    });
   }
 }

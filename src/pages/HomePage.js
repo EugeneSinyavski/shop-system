@@ -1,5 +1,6 @@
 import { BasePage } from './BasePage';
 import { parsePrice } from '../utils/parsePrice';
+import { test } from '@playwright/test';
 
 export class HomePage extends BasePage {
   constructor(page) {
@@ -33,7 +34,9 @@ export class HomePage extends BasePage {
   }
 
   async addProductToCart(index = 0) {
-    const { addToCartButton } = this.getProductCardLocators(index);
-    await addToCartButton.click();
+    await test.step(`Action: Add product to cart`, async () => {
+      const { addToCartButton } = this.getProductCardLocators(index);
+      await addToCartButton.click();
+    });
   }
 }
