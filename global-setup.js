@@ -5,7 +5,7 @@ import { execSync } from 'child_process';
 const getGitBranch = () => {
   try {
     return execSync('git rev-parse --abbrev-ref HEAD').toString().trim();
-  } catch (e) {
+  } catch {
     return process.env.GIT_BRANCH || 'unknown';
   }
 };

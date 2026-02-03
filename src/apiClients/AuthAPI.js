@@ -47,9 +47,7 @@ export class AuthAPI {
 
       await this._attachData('Error Response Body', body);
 
-      await test.step(`Verify status code is ${expectedStatus}`, async () => {
-        expect(response.status()).toBe(expectedStatus);
-      });
+      expect(response.status()).toBe(expectedStatus);
 
       return body;
     });

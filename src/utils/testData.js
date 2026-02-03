@@ -1,5 +1,5 @@
 import { Faker, ru } from '@faker-js/faker';
-
+//rename
 const faker = new Faker({ locale: [ru] });
 
 export function generateTestUser(overrides = {}) {
